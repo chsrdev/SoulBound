@@ -1,0 +1,4 @@
+name: SoulBound
+version: '1.0'
+main: dev.chsr.soulBound.SoulBound
+api-version: '1.21'
