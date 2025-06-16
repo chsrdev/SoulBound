@@ -9,7 +9,10 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
+import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.inventory.TradeSelectEvent
 import org.bukkit.event.player.*
 import org.bukkit.event.world.PortalCreateEvent
@@ -24,6 +27,7 @@ class EventListener : Listener {
         event.player.health = playerToCopy.health
         event.player.saturation = playerToCopy.saturation
         event.player.inventory.contents = playerToCopy.inventory.contents
+        event.player.enderChest.contents = playerToCopy.enderChest.contents
     }
 
     @EventHandler
@@ -153,7 +157,11 @@ class EventListener : Listener {
 
     @EventHandler
     fun onPlayerDrop(event: PlayerDropItemEvent) {
-        syncInventory(event.player)
+        Bukkit.getOnlinePlayers().forEach {
+            if (it != event.player) {
+                it.inventory.removeItem(event.itemDrop.itemStack)
+            }
+        }
     }
 
     @EventHandler
@@ -228,14 +236,26 @@ class EventListener : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
-        if (event.whoClicked is Player)
+        if (event.whoClicked is Player) {
             syncInventory(event.whoClicked as Player)
+            doAfterTick {
+                Bukkit.getOnlinePlayers().forEach {
+                    it.enderChest.contents = (event.whoClicked as Player).enderChest.contents
+                }
+            }
+        }
     }
 
     @EventHandler
     fun onInventoryDrag(event: InventoryDragEvent) {
-        if (event.whoClicked is Player)
+        if (event.whoClicked is Player) {
             syncInventory(event.whoClicked as Player)
+            doAfterTick {
+                Bukkit.getOnlinePlayers().forEach {
+                    it.enderChest.contents = (event.whoClicked as Player).enderChest.contents
+                }
+            }
+        }
     }
 
     @EventHandler
